@@ -122,6 +122,10 @@
       .sidelay-window, .sidelay-pill, .sidelay-launcher {
         pointer-events: auto !important;
       }
+      .btn-icon {
+        cursor: pointer !important;
+        pointer-events: auto !important;
+      }
       .sidelay-window {
         position: fixed !important;
         z-index: 2147483647 !important;
@@ -137,7 +141,7 @@
         border: 1px solid #30363d !important;
         border-radius: 12px !important;
         box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-        display: flex !important;
+        display: flex;
         flex-direction: column !important;
         overflow: hidden !important;
       }
@@ -150,7 +154,7 @@
         border: 1px solid #388bfd !important;
         border-radius: 24px !important;
         padding: 6px 14px !important;
-        display: flex !important;
+        display: flex;
         align-items: center !important;
         gap: 10px !important;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
@@ -170,7 +174,7 @@
         font-size: 12px !important;
         font-weight: 800 !important;
         cursor: pointer !important;
-        display: flex !important;
+        display: flex;
         align-items: center !important;
         gap: 6px !important;
         box-shadow: -2px 0 12px rgba(0,0,0,0.4) !important;
@@ -589,9 +593,9 @@
   elWindow.style.top = '70px';
   elWindow.style.right = '24px';
   elWindow.style.left = 'auto';
-  elWindow.style.display = 'flex';
-  elLauncher.style.display = 'none';
-  elPill.style.display = 'none';
+  elWindow.style.setProperty('display', 'flex', 'important');
+  elLauncher.style.setProperty('display', 'none', 'important');
+  elPill.style.setProperty('display', 'none', 'important');
   isClosed = false;
   isMinimized = false;
 
@@ -631,26 +635,27 @@
   function openWindow() {
     isClosed = false;
     isMinimized = false;
-    elLauncher.style.display = 'none';
-    elPill.style.display = 'none';
-    elWindow.style.display = 'flex';
+    elLauncher.style.setProperty('display', 'none', 'important');
+    elPill.style.setProperty('display', 'none', 'important');
+    elWindow.style.setProperty('display', 'flex', 'important');
     persistState();
   }
 
   function minimizeWindow() {
     isClosed = false;
     isMinimized = true;
-    elWindow.style.display = 'none';
-    elLauncher.style.display = 'none';
-    elPill.style.display = 'flex';
+    elWindow.style.setProperty('display', 'none', 'important');
+    elLauncher.style.setProperty('display', 'none', 'important');
+    elPill.style.setProperty('display', 'flex', 'important');
     persistState();
   }
 
   function closeToLauncher() {
     isClosed = true;
-    elWindow.style.display = 'none';
-    elPill.style.display = 'none';
-    elLauncher.style.display = 'flex';
+    isMinimized = false;
+    elWindow.style.setProperty('display', 'none', 'important');
+    elPill.style.setProperty('display', 'none', 'important');
+    elLauncher.style.setProperty('display', 'flex', 'important');
     persistState();
   }
 
@@ -747,17 +752,23 @@
   });
 
   // Minimize / Expand logic
-  btnMinimize.addEventListener('click', () => {
+  btnMinimize.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     minimizeWindow();
   });
 
   // Close to Launcher logic
-  btnClose.addEventListener('click', () => {
+  btnClose.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     closeToLauncher();
   });
 
   // Edge Launcher button click -> Reopen window
-  elLauncher.addEventListener('click', () => {
+  elLauncher.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     openWindow();
   });
 
