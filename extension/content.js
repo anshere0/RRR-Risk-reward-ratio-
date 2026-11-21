@@ -129,21 +129,54 @@
       .sidelay-window {
         position: fixed !important;
         z-index: 2147483647 !important;
-        top: 70px !important;
-        right: 24px !important;
-        width: 480px !important;
-        height: 680px !important;
-        min-width: 280px !important;
-        min-height: 200px !important;
-        max-width: 96vw !important;
-        max-height: 96vh !important;
-        background: #0d1117 !important;
-        border: 1px solid #30363d !important;
-        border-radius: 12px !important;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+        top: 70px;
+        right: 24px;
+        width: 480px;
+        height: 680px;
+        min-width: 300px;
+        min-height: 220px;
+        max-width: 98vw;
+        max-height: 98vh;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
         display: flex;
-        flex-direction: column !important;
-        overflow: hidden !important;
+        flex-direction: column;
+        overflow: hidden;
+        resize: both;
+      }
+      .sidelay-footer {
+        position: relative !important;
+        background: #161b22;
+        border-top: 1px solid #21262d;
+        padding: 6px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #8b949e;
+        user-select: none;
+      }
+      .resize-handle {
+        position: absolute !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 24px !important;
+        height: 24px !important;
+        cursor: nwse-resize !important;
+        color: #58a6ff !important;
+        user-select: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 14px !important;
+        z-index: 100 !important;
+        pointer-events: auto !important;
+      }
+      .resize-handle:hover {
+        color: #79c0ff !important;
+        transform: scale(1.2) !important;
       }
       .sidelay-pill {
         position: fixed !important;
@@ -589,10 +622,27 @@
   if (customEntryPrice) inputOptionEntry.value = customEntryPrice;
   if (selectedSymbol) inputSymbol.value = selectedSymbol;
 
-  // Always anchor the window safely in the upper-right corner on fresh page load
-  elWindow.style.top = '70px';
-  elWindow.style.right = '24px';
-  elWindow.style.left = 'auto';
+  // Restore persisted position & dimensions if valid, otherwise anchor safely in upper-right
+  try {
+    const saved = JSON.parse(localStorage.getItem('delta_rr_overlay_state') || '{}');
+    if (saved.width && saved.height) {
+      elWindow.style.width = `${Math.max(300, saved.width)}px`;
+      elWindow.style.height = `${Math.max(220, saved.height)}px`;
+    }
+    if (saved.x !== undefined && saved.y !== undefined && saved.x >= 0 && saved.y >= 0) {
+      elWindow.style.left = `${Math.min(window.innerWidth - 100, Math.max(10, saved.x))}px`;
+      elWindow.style.top = `${Math.min(window.innerHeight - 100, Math.max(10, saved.y))}px`;
+      elWindow.style.right = 'auto';
+    } else {
+      elWindow.style.top = '70px';
+      elWindow.style.right = '24px';
+      elWindow.style.left = 'auto';
+    }
+  } catch (e) {
+    elWindow.style.top = '70px';
+    elWindow.style.right = '24px';
+    elWindow.style.left = 'auto';
+  }
   elWindow.style.setProperty('display', 'flex', 'important');
   elLauncher.style.setProperty('display', 'none', 'important');
   elPill.style.setProperty('display', 'none', 'important');
@@ -666,6 +716,9 @@
     const rect = elWindow.getBoundingClientRect();
     dragOffset.x = e.clientX - rect.left;
     dragOffset.y = e.clientY - rect.top;
+    elWindow.style.left = `${rect.left}px`;
+    elWindow.style.top = `${rect.top}px`;
+    elWindow.style.right = 'auto';
     e.preventDefault();
   });
 
@@ -673,6 +726,9 @@
   resizeHandle.addEventListener('mousedown', (e) => {
     isResizing = true;
     const rect = elWindow.getBoundingClientRect();
+    elWindow.style.left = `${rect.left}px`;
+    elWindow.style.top = `${rect.top}px`;
+    elWindow.style.right = 'auto';
     resizeStart.x = e.clientX;
     resizeStart.y = e.clientY;
     resizeStart.w = rect.width;
@@ -701,8 +757,8 @@
       elWindow.style.top = `${newY}px`;
       elWindow.style.right = 'auto';
     } else if (isResizing) {
-      const newW = Math.max(280, resizeStart.w + (e.clientX - resizeStart.x));
-      const newH = Math.max(200, resizeStart.h + (e.clientY - resizeStart.y));
+      const newW = Math.max(300, Math.min(window.innerWidth - 20, resizeStart.w + (e.clientX - resizeStart.x)));
+      const newH = Math.max(220, Math.min(window.innerHeight - 20, resizeStart.h + (e.clientY - resizeStart.y)));
       elWindow.style.width = `${newW}px`;
       elWindow.style.height = `${newH}px`;
     } else if (isPillDragging) {
