@@ -1,0 +1,34 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Distribution
+*.egg-info/
+dist/
+build/
+
+# SQLite journal
+*.db
+*.db-journal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Probe output (contains live data, regenerate with probe_delta.py)
+docs/probe_output.json

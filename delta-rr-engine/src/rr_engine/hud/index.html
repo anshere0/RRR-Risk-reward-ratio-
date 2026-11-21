@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delta BTC Options Risk-Reward Engine</title>
+  <link rel="stylesheet" href="hud.css">
+</head>
+<body>
+
+  <!-- 1. Mandatory Amber UNVALIDATED Banner (Non-dismissible) -->
+  <div class="unvalidated-banner" id="unvalidatedBanner">
+    <span>⚠️ UNVALIDATED ENGINE &bull; PAPER-TRADING ONLY</span>
+    <a href="#" class="info-btn" id="infoBtn">Docs/05 Checklist &raquo;</a>
+  </div>
+
+  <!-- 2. Top Header -->
+  <header class="hud-header">
+    <div class="hud-title-wrap">
+      <span class="hud-title">DELTA BTC RR</span>
+      <span class="hud-spot" id="spotIndexPrice">BTC: --</span>
+    </div>
+    <div class="hud-status-wrap">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">CONNECTING</span>
+      <span class="data-age" id="dataAge">Age: --</span>
+    </div>
+  </header>
+
+  <!-- 3. Controls / User Inputs -->
+  <section class="controls-container">
+    <div class="input-row">
+      <div class="input-group symbol-group">
+        <label for="symbolInput">Option Symbol</label>
+        <input type="text" id="symbolInput" list="optionsList" placeholder="e.g. C-BTC-64800-281126" autocomplete="off" spellcheck="false">
+        <datalist id="optionsList"></datalist>
+      </div>
+      <div class="input-group">
+        <label for="lotsInput">Lots</label>
+        <input type="number" id="lotsInput" value="10" min="1" step="1">
+      </div>
+      <div class="input-group">
+        <label for="maxRiskInput">Max Risk $</label>
+        <input type="number" id="maxRiskInput" placeholder="Optional" min="0" step="10">
+      </div>
+      <input type="hidden" id="holdMinutesInput" value="30">
+    </div>
+
+    <div class="action-row">
+      <div class="quick-buttons">
+        <button type="button" class="btn-atm" id="atmCallBtn">ATM Call</button>
+        <button type="button" class="btn-atm" id="atmPutBtn">ATM Put</button>
+      </div>
+
+      <button type="button" class="evaluate-btn" id="evaluateBtn">
+        <span>EVALUATE</span>
+        <span class="hotkey-badge">E</span>
+      </button>
+
+      <label class="toggle-wrap">
+        <input type="checkbox" id="autoRefreshToggle" checked>
+        <span>Auto 1s</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- 3b. 24/7 Option Chain Table -->
+  <section class="chain-section" id="chainSection">
+    <div class="chain-header">
+      <span>24/7 Option Chain</span>
+      <div class="expiry-chips" id="hudExpiryChips">
+        <span style="font-size:11px;color:#94a3b8;">Loading expiries...</span>
+      </div>
+    </div>
+    <div class="chain-table-wrap">
+      <table class="hud-chain-table">
+        <thead>
+          <tr>
+            <th colspan="3" class="th-call">CALLS</th>
+            <th class="th-strike">STRIKE</th>
+            <th colspan="3" class="th-put">PUTS</th>
+          </tr>
+          <tr>
+            <th>Bid</th>
+            <th>Ask</th>
+            <th>Mark</th>
+            <th class="th-strike">USD</th>
+            <th>Mark</th>
+            <th>Bid</th>
+            <th>Ask</th>
+          </tr>
+        </thead>
+        <tbody id="hudChainTbody">
+          <tr><td colspan="7" style="text-align:center;padding:16px;color:#94a3b8;">Connecting to live Delta feed...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. Hero Verdict Card -->
+  <main>
+    <div class="verdict-hero pending" id="verdictHero">
+      <div class="verdict-title">
+        <span id="verdictText">EVALUATING</span>
+        <span class="direction-badge" id="directionBadge" style="display:none;"></span>
+      </div>
+    </div>
+
+    <!-- 5. Core Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">Net Risk-Reward</span>
+        <span class="metric-value" id="netRrVal">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">B/E Win Rate</span>
+        <span class="metric-value" id="beWinVal">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Planned Risk</span>
+        <span class="metric-value" id="planRiskVal">--</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Planned Reward</span>
+        <span class="metric-value" id="planRewardVal">--</span>
+      </div>
+    </div>
+
+    <!-- 6. Price Targets (Dual Option vs Spot) -->
+    <div class="price-table-container">
+      <div class="price-table-title">
+        <span>Structure & Targets</span>
+        <span style="font-size:10px; font-weight:normal; color:#94a3b8;">1.5x Spread + Fees + GST</span>
+      </div>
+      <table class="price-table">
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Option Premium</th>
+            <th>BTC Spot</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-entry">
+            <td><strong>Entry</strong></td>
+            <td>
+              <span id="entryOptionVal">--</span>
+              <span class="price-sub">Ask Limit</span>
+            </td>
+            <td>
+              <span id="entrySpotVal">--</span>
+              <span class="price-sub">Current Index</span>
+            </td>
+          </tr>
+          <tr class="row-sl">
+            <td><strong>Stop Loss (SL)</strong></td>
+            <td>
+              <span id="slOptionVal">--</span>
+              <span class="price-sub" id="slOptionSub"></span>
+            </td>
+            <td>
+              <span id="slSpotVal">--</span>
+              <span class="price-sub" id="slSpotSub"></span>
+            </td>
+          </tr>
+          <tr class="row-tp">
+            <td><strong>Take Profit (TP)</strong></td>
+            <td>
+              <span id="tpOptionVal">--</span>
+              <span class="price-sub" id="tpOptionSub"></span>
+            </td>
+            <td>
+              <span id="tpSpotVal">--</span>
+              <span class="price-sub" id="tpSpotSub"></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 7. Sizing & Risk Budget Bar -->
+    <div class="sizing-bar">
+      <span>Lots: <strong id="lotsSizingVal">--</strong></span>
+      <span>Worst-Case Loss: <strong id="worstLossVal">--</strong></span>
+      <span>Round-Trip Fees: <strong id="feesVal">--</strong></span>
+      <span>Max Lots Allowed: <strong id="maxLotsVal">--</strong></span>
+    </div>
+
+    <!-- 8. Plain-English Reasons & Gates -->
+    <div class="reasons-container">
+      <div class="reasons-header">
+        <span>Decision Rationale & Safety Gates</span>
+      </div>
+      <ul class="reason-list" id="reasonsList">
+        <li class="reason-item pass">
+          <span class="reason-code">[AWAITING]</span>
+          <span>Press Evaluate [E] or wait for live stream tick.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 9. Provenance Bar -->
+    <div class="provenance-bar">
+      <span>Symbol: <strong id="provSymbol">--</strong></span>
+      <span>Index: <strong id="provIndex">.DEXBTUSD</strong></span>
+      <span>Region: <strong id="provRegion">india</strong></span>
+      <span>Config: <strong id="provConfigHash">--</strong></span>
+      <span id="computedAgo">Computed -- ago</span>
+    </div>
+  </main>
+
+  <!-- 10. Mandatory Non-Advice Disclaimer Footer (docs/06 §10) -->
+  <footer class="hud-footer">
+    Decision support, not financial advice. Options can lose 100% of premium.
+  </footer>
+
+  <!-- 11. Docs/05 Validation Checklist Modal -->
+  <div class="modal-overlay" id="infoModal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">Go-Live Validation Checklist (docs/05)</span>
+        <button type="button" class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <ul class="checklist">
+        <li>&bull; <strong>Status: UNVALIDATED.</strong> The engine is running in paper-trading decision-support mode.</li>
+        <li>&bull; <strong>100 Live / Replay Evaluations:</strong> Must verify positive expectancy across 100 recorded evaluations without crashes.</li>
+        <li>&bull; <strong>10 Paper Trades:</strong> Log 10 consecutive simulated fills and compare predicted option price vs actual market tick.</li>
+        <li>&bull; <strong>Zero Order Placement:</strong> Local read-only tool strictly bound to 127.0.0.1. Orders are placed by the human trader manually on Delta.</li>
+        <li>&bull; <strong>Keyboard Shortcut:</strong> Press <code>E</code> anytime on the screen to trigger immediate evaluation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="hud.js"></script>
+</body>
+</html>

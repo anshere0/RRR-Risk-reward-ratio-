@@ -1,0 +1,48 @@
+# Byte-compiled / Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Linting cache
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Databases & local journals (avoids committing 400MB+ SQLite files)
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite3
+
+# Local secrets & credentials (if any)
+.env
+.env.local
+.env.*.local
+
+# Temporary archives, reviews & blueprints
+*.zip
+claude_review_package/
+delta-rr-engine-blueprint/
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini

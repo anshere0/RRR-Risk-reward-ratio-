@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RREvaluateResponse",
+  "type": "object",
+  "required": ["verdict", "validation_status", "provenance", "reasons"],
+  "properties": {
+    "verdict": {"enum": ["TRADE", "NO_TRADE", "CAUTION"]},
+    "validation_status": {"enum": ["UNVALIDATED", "VALIDATED"]},
+    "provenance": {
+      "type": "object",
+      "required": ["symbol", "region", "index_symbol", "index_price", "computed_at_utc", "data_age_seconds", "config_hash", "engine_version"],
+      "properties": {
+        "symbol": {"type": "string"}, "region": {"enum": ["india", "global"]}, "index_symbol": {"type": "string"},
+        "index_price": {"type": "number"}, "computed_at_utc": {"type": "string"}, "data_age_seconds": {"type": "number"},
+        "seconds_to_expiry": {"type": "number"}, "config_hash": {"type": "string"}, "engine_version": {"type": "string"}
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["code", "severity", "message"],
+        "properties": {"code": {"type": "string"}, "severity": {"enum": ["hard", "warning"]}, "message": {"type": "string"},
+                       "value": {"type": ["number", "string", "null"]}, "threshold": {"type": ["number", "string", "null"]}}
+      }
+    },
+    "setup": {
+      "type": ["object", "null"],
+      "description": "Present when the geometry could be computed (even if NO_TRADE). Null for data-integrity failures.",
+      "properties": {
+        "direction": {"enum": ["call", "put"]},
+        "spot": {"type": "object", "properties": {"price": {"type": "number"}, "sl": {"type": "number"}, "tp": {"type": "number"}, "sl_source": {"type": "string"}, "tp_source": {"type": "string"}, "atr": {"type": "number"}, "spot_rr": {"type": "number"}}},
+        "option": {"type": "object", "properties": {
+          "entry_limit": {"type": "number"}, "sl_premium_model": {"type": "number"}, "tp_premium_model": {"type": "number"},
+          "sl_exit_net": {"type": "number"}, "tp_exit_net": {"type": "number"}, "sigma_anchor": {"type": "number"},
+          "bid": {"type": "number"}, "ask": {"type": "number"}, "mark": {"type": "number"}, "spread_pct": {"type": "number"}}},
+        "money": {"type": "object", "properties": {
+          "lots": {"type": "number"}, "risk_usd": {"type": "number"}, "reward_usd": {"type": "number"}, "net_rr": {"type": "number"},
+          "breakeven_win_probability": {"type": "number"}, "worst_case_loss_usd": {"type": "number"},
+          "fees_usd_round_trip": {"type": "number"}, "max_lots_for_risk_budget": {"type": ["number", "null"]}}},
+        "ladder": {"type": "array", "items": {"type": "object", "properties": {"spot": {"type": "number"}, "option_model": {"type": "number"}}}},
+        "probability": {"type": ["object", "null"], "properties": {"p_tp": {"type": "number"}, "p_sl": {"type": "number"}, "p_timeout": {"type": "number"}, "mc_std_error": {"type": "number"}}}
+      }
+    }
+  }
+}

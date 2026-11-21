@@ -1,0 +1,75 @@
+# Copy to config/settings.yaml. Every threshold used by a gate lives here. Hash of this file is stored with every evaluation.
+region: india                 # india | global   (must match the account you trade on)
+hosts:
+  india:  {rest: "https://api.india.delta.exchange", ws: "wss://public-socket.india.delta.exchange"}
+  global: {rest: "https://api.delta.exchange",       ws: "wss://socket.delta.exchange"}   # verify global WS host in docs
+server: {host: "127.0.0.1", port: 8000}
+timeframe: "5m"
+underlying: "BTC"
+display_timezone: "Asia/Kolkata"
+
+pricing:
+  risk_free_rate: 0.0
+  seconds_per_year: 31536000        # 365 * 24 * 3600
+  iv_shock_sl: -0.02                # vol points (decimal) assumed at the stop
+  iv_shock_tp: 0.0                  # no credit for vol gains at the target
+  sl_spread_stress: 1.5
+  hold_minutes_default: 30
+
+fees:                               # VERIFY against a real fill's paid_commission (see docs/03 section 5)
+  gst: 0.18                         # Delta India adds GST on fees; set 0.0 for global if not applicable
+  use_product_rates: true           # read taker_commission_rate / premium_commission_rate from the product
+
+structure:
+  atr_period: 14
+  pivot_k: 2
+  stop_lookback_candles: 36
+  target_lookback_candles: 144
+  stop_buffer_atr: 0.20
+  stop_min_atr: 0.5
+  stop_max_atr: 2.0
+  stop_fallback_atr: 1.0
+  max_premium_risk_pct: 0.20
+  target_min_atr: 0.75
+  min_structural_rrr: 1.50
+  target_fallback_atr: 1.5
+  target_reach_factor: 1.5
+  round_number_steps: [500, 1000]
+
+gates:
+  data_stale_seconds: 3
+  index_perp_divergence_pct: 0.25
+  clock_skew_seconds: 2
+  greeks_mismatch_warn: 0.07
+  greeks_mismatch_hard: 0.15
+  expiry_min_minutes: 60
+  window_end_before_expiry_minutes: 10
+  spread_max_pct: 1.5
+  spread_share_of_reward_max: 0.20
+  fees_share_of_reward_max: 0.30
+  depth_entry_multiple: 1.5
+  depth_exit_multiple: 1.0
+  premium_min: 20
+  adx_period: 14
+  adx_chop: 18
+  adx_trend: 25
+  spike_atr_multiple: 2.5
+  spike_wait_candles: 2
+  vol_regime_multiple: 3.0
+  net_rr_min: 1.5
+  breakeven_max: 0.45
+  atm_delta_range: [0.35, 0.65]      # warning only
+  event_windows: []                  # list of {start_utc, end_utc, label}
+
+edge:
+  mode: none                        # none | empirical   (empirical only after docs/05 criteria)
+  min_samples: 150
+  wilson_confidence: 0.80
+  margin_points: 3
+
+montecarlo: {paths: 20000, pool_days: 7, enabled: true}
+
+session:                            # optional discipline gates, need the journal
+  daily_loss_limit_usd: null
+  cooldown_after_losses: 3
+  cooldown_minutes: 30

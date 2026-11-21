@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Delta BTC Options Risk-Reward Sidelay",
+  "version": "1.0.0",
+  "description": "Floating, resizable 24/7 sidelay overlay for Delta Exchange calculating chart-derived risk-reward ratio across all option strikes.",
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "*://*.delta.exchange/*",
+    "*://delta.exchange/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.delta.exchange/*",
+        "*://delta.exchange/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "overlay.css"
+      ],
+      "matches": [
+        "*://*.delta.exchange/*",
+        "*://delta.exchange/*"
+      ]
+    }
+  ]
+}
