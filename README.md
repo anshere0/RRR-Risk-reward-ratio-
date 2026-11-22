@@ -1,5 +1,9 @@
 # Delta BTC Options Risk-Reward Engine (RRR)
 
+> [!IMPORTANT]
+> **Educational & Decision-Support Tool**: This software is built for algorithmic research and simulation. It does not constitute financial advice, trade recommendations, or guarantees of profit. Trading cryptocurrency derivatives and options carries substantial risk of capital loss.
+
+
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.14-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Platform](https://img.shields.io/badge/Exchange-Delta%20Exchange%20India-orange.svg)](https://india.delta.exchange)
